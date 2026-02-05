@@ -27,6 +27,7 @@ export class Game {
 
     init(): void {
         this.diceRenderer.setOnArrange((die) => this.handleDieArrange(die));
+        this.diceRenderer.setOnUnarrange((die) => this.handleDieUnarrange(die));
         this.diceRenderer.setupArrangementZone();
 
         document.getElementById('roll-btn')!.addEventListener('click', () => this.rollDice());
@@ -55,6 +56,16 @@ export class Game {
             if (this.state.isArrangementComplete()) {
                 document.getElementById('confirm-btn')!.removeAttribute('disabled');
             }
+        }
+    }
+
+    private handleDieUnarrange(die: Die): void {
+        if (this.state.unarrangeDie(die)) {
+            this.diceRenderer.renderDiceTray(this.state.getUnarrangedDice());
+            this.diceRenderer.renderArrangementZone(this.state.arrangedDice);
+
+            // Disable confirm if arrangement is no longer complete
+            document.getElementById('confirm-btn')!.setAttribute('disabled', 'true');
         }
     }
 

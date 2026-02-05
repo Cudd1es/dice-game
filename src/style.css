@@ -214,7 +214,36 @@ body {
 }
 
 .die.arranged {
-    cursor: default;
+    cursor: pointer;
+}
+
+.die.arranged:hover::after {
+    content: 'Click to return';
+    position: absolute;
+    bottom: -28px;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+/* Drag and drop styles */
+.die.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+}
+
+.die[draggable="true"] {
+    cursor: grab;
+}
+
+.die[draggable="true"]:active {
+    cursor: grabbing;
+}
+
+#dice-tray.drag-over,
+#arrangement-zone.drag-over {
+    background: rgba(74, 222, 128, 0.15);
+    border-color: var(--success);
 }
 
 .mod-badge {

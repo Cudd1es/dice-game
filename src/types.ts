@@ -1,7 +1,10 @@
 // src/types.ts
 export interface ChainState {
     nextBonus: number;
+    nextMultiplier: number;      // Multiplier for next die (from conditional modifiers)
     globalMultiplier: number;
+    stackBonus: number;          // Current stack bonus value
+    stackIncrement: number;      // How much stack increases per die
 }
 
 export interface ModifierContext {
@@ -41,7 +44,7 @@ export interface DieFace {
 }
 
 export interface Modifier {
-    type: 'add' | 'multiply' | 'next' | 'global';
+    type: 'add' | 'multiply' | 'next' | 'global' | 'stack' | 'conditional';
     name: string;
     description: string;
     apply(context: ModifierContext): number;

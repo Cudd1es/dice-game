@@ -48,6 +48,13 @@ export class GameState {
         return true;
     }
 
+    unarrangeDie(die: Die): boolean {
+        const index = this.arrangedDice.indexOf(die);
+        if (index === -1) return false;
+        this.arrangedDice.splice(index, 1);
+        return true;
+    }
+
     isArrangementComplete(): boolean {
         return this.arrangedDice.length === this.dice.length;
     }

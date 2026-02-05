@@ -1,7 +1,16 @@
 // src/shop.ts
 import type { Die, Modifier } from './types';
 import { DieImpl } from './dice';
-import { AddModifier, MultiplyModifier, NextAddModifier, GlobalMultiplyModifier } from './modifiers';
+import {
+    AddModifier,
+    MultiplyModifier,
+    NextAddModifier,
+    GlobalMultiplyModifier,
+    StackAddModifier,
+    IfEvenNextMultiply,
+    IfHighNextAdd,
+    IfMaxNextMultiply
+} from './modifiers';
 
 export interface ShopItem {
     type: 'modifier' | 'die';
@@ -51,6 +60,31 @@ export class Shop {
             {
                 create: () => new GlobalMultiplyModifier(1.5),
                 price: 15 + level * 2,
+                name: (m: Modifier) => m.name,
+                desc: (m: Modifier) => m.description
+            },
+            // New modifier types
+            {
+                create: () => new StackAddModifier(1),
+                price: 12 + level * 2,
+                name: (m: Modifier) => m.name,
+                desc: (m: Modifier) => m.description
+            },
+            {
+                create: () => new IfEvenNextMultiply(2),
+                price: 10 + level,
+                name: (m: Modifier) => m.name,
+                desc: (m: Modifier) => m.description
+            },
+            {
+                create: () => new IfHighNextAdd(4, 3),
+                price: 8 + level,
+                name: (m: Modifier) => m.name,
+                desc: (m: Modifier) => m.description
+            },
+            {
+                create: () => new IfMaxNextMultiply(3),
+                price: 14 + level * 2,
                 name: (m: Modifier) => m.name,
                 desc: (m: Modifier) => m.description
             }
