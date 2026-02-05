@@ -35,3 +35,233 @@ body {
 .hidden {
     display: none !important;
 }
+
+/* Header */
+#game-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+#game-header h1 {
+    color: var(--accent-glow);
+    font-size: 2.5rem;
+    text-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+}
+
+#stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1rem;
+    font-size: 1.1rem;
+}
+
+#stats span {
+    padding: 0.5rem 1rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+}
+
+#gold-display {
+    color: var(--gold);
+}
+
+#score-display {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-top: 1rem;
+    color: var(--success);
+}
+
+/* Resolution Display */
+#resolution-display {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    padding: 1rem;
+    margin: 1rem 0;
+    min-height: 50px;
+}
+
+#resolution-display.active {
+    border: 1px solid var(--accent);
+}
+
+.resolution-step {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 0.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.step-header {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.step-pos {
+    color: var(--accent);
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+.step-value {
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.step-effects {
+    padding-left: 1rem;
+    border-left: 2px solid var(--accent);
+    margin: 0.5rem 0;
+}
+
+.step-effect {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.3rem 0;
+    font-size: 0.9rem;
+}
+
+.effect-source {
+    color: var(--gold);
+}
+
+.effect-calc {
+    color: var(--text-secondary);
+}
+
+.step-final {
+    text-align: right;
+    font-size: 1.2rem;
+}
+
+.final-value {
+    color: var(--success);
+    font-weight: bold;
+}
+
+.resolution-total {
+    text-align: center;
+    font-size: 1.5rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    background: linear-gradient(145deg, rgba(233, 69, 96, 0.2), rgba(255, 107, 138, 0.1));
+    border-radius: 8px;
+    color: var(--accent-glow);
+}
+
+/* Dice Styles */
+#dice-tray,
+#arrangement-zone {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem;
+    min-height: 100px;
+    margin: 1rem 0;
+    border-radius: 12px;
+}
+
+#dice-tray {
+    background: var(--bg-secondary);
+}
+
+#arrangement-zone {
+    background: rgba(233, 69, 96, 0.1);
+    border: 2px dashed var(--accent);
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+#arrangement-zone:hover {
+    background: rgba(233, 69, 96, 0.15);
+    border-color: var(--accent-glow);
+}
+
+.zone-hint {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.die {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(145deg, #2a2a4a, #1a1a3a);
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    user-select: none;
+}
+
+.die:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(233, 69, 96, 0.3);
+}
+
+.die.selected {
+    border-color: var(--gold);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    transform: translateY(-5px) scale(1.05);
+}
+
+.die.arranged {
+    cursor: default;
+}
+
+.mod-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: var(--gold);
+    color: #000;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.pos-label {
+    position: absolute;
+    bottom: -20px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* Buttons */
+#game-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+#game-controls button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+#game-controls button:hover:not(:disabled) {
+    background: var(--accent-glow);
+    transform: translateY(-2px);
+}
+
+#game-controls button:disabled {
+    background: #666;
+    cursor: not-allowed;
+}
