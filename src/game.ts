@@ -3,6 +3,8 @@ import { GameState } from './gameState';
 import { ChainResolver } from './resolver';
 import { DiceRenderer } from './ui/diceRenderer';
 import { ResolutionRenderer } from './ui/resolutionRenderer';
+import { ShopRenderer } from './ui/shopRenderer';
+import { Shop, ShopItem } from './shop';
 import type { Die } from './types';
 
 export class Game {
@@ -10,12 +12,17 @@ export class Game {
     private resolver: ChainResolver;
     private diceRenderer: DiceRenderer;
     private resolutionRenderer: ResolutionRenderer;
+    private shopRenderer: ShopRenderer;
+    private shop: Shop;
+    private currentShopItems: ShopItem[] = [];
 
     constructor() {
         this.state = new GameState();
         this.resolver = new ChainResolver();
         this.diceRenderer = new DiceRenderer('dice-tray', 'arrangement-zone');
         this.resolutionRenderer = new ResolutionRenderer('resolution-display');
+        this.shopRenderer = new ShopRenderer('shop-overlay');
+        this.shop = new Shop();
     }
 
     init(): void {
@@ -83,22 +90,52 @@ export class Game {
     }
 
     private showShop(): void {
-        const overlay = document.getElementById('shop-overlay')!;
-        overlay.classList.remove('hidden');
-        overlay.innerHTML = `
-            <div class="overlay-content">
-                <h2>Shop</h2>
-                <p>Gold: ${this.state.gold}</p>
-                <p>(Shop items coming in next task)</p>
-                <button id="skip-shop-btn">Continue</button>
-            </div>
-        `;
-        document.getElementById('skip-shop-btn')!.addEventListener('click', () => {
-            overlay.classList.add('hidden');
-            this.state.endShop();
-            document.getElementById('roll-btn')!.removeAttribute('disabled');
-            this.updateUI();
-        });
+        this.currentShopItems = this.shop.generateItems(this.state.level);
+
+        this.shopRenderer.render(
+            this.currentShopItems,
+            this.state.gold,
+            this.state.dice,
+            (index, targetDieId) => this.handleBuy(index, targetDieId),
+            () => this.closeShop()
+        );
+    }
+
+    private handleBuy(index: number, targetDieId: string | null): void {
+        const item = this.currentShopItems[index];
+        if (!item || this.state.gold < item.price) return;
+
+        this.state.gold -= item.price;
+
+        if (item.type === 'modifier' && item.item && targetDieId) {
+            const targetDie = this.state.dice.find(d => d.id === targetDieId);
+            if (targetDie) {
+                targetDie.modifiers.push(item.item);
+            }
+        } else if (item.type === 'die' && item.die) {
+            this.state.dice.push(item.die);
+        }
+
+        // Remove purchased item
+        this.currentShopItems.splice(index, 1);
+
+        // Re-render shop
+        this.shopRenderer.render(
+            this.currentShopItems,
+            this.state.gold,
+            this.state.dice,
+            (i, tid) => this.handleBuy(i, tid),
+            () => this.closeShop()
+        );
+
+        this.updateUI();
+    }
+
+    private closeShop(): void {
+        this.shopRenderer.hide();
+        this.state.endShop();
+        document.getElementById('roll-btn')!.removeAttribute('disabled');
+        this.updateUI();
     }
 
     private showGameOver(): void {
