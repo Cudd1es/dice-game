@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice Roguelike</title>
+    <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+    <div id="game-container">
+        <header id="game-header">
+            <h1>Dice Roguelike</h1>
+            <div id="stats">
+                <span id="level-display">Level: 1</span>
+                <span id="gold-display">Gold: 0</span>
+                <span id="target-display">Target: 10</span>
+            </div>
+        </header>
+        <main id="game-area">
+            <div id="dice-tray"></div>
+            <div id="arrangement-zone"></div>
+            <div id="resolution-display"></div>
+            <div id="score-display">Score: 0</div>
+        </main>
+        <footer id="game-controls">
+            <button id="roll-btn">Roll Dice</button>
+            <button id="confirm-btn" disabled>Confirm Arrangement</button>
+        </footer>
+    </div>
+    <div id="shop-overlay" class="hidden"></div>
+    <div id="game-over-overlay" class="hidden"></div>
+    <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
