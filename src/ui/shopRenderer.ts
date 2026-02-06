@@ -44,9 +44,12 @@ export class ShopRenderer {
         existingDice.forEach((die, index) => {
             const dieEl = document.createElement('div');
             dieEl.className = 'sidebar-die';
+            dieEl.dataset.dieId = die.id;
+
             const modText = die.modifiers.length > 0
                 ? die.modifiers.map(m => m.name).join(', ')
                 : 'No modifiers';
+
             dieEl.innerHTML = `
                 <span class="die-number">#${index + 1}</span>
                 <span class="die-id">${this.getDieName(die)}</span>
@@ -92,22 +95,45 @@ export class ShopRenderer {
             itemsContainer.appendChild(itemEl);
         });
 
+        // Initialize highlighting event listeners
+        this.overlay.querySelectorAll('.target-select').forEach((el) => {
+            const select = el as HTMLSelectElement;
+            const handler = () => {
+                this.highlightDie(select.value);
+            };
+            select.addEventListener('change', handler);
+            select.addEventListener('focus', handler);
+            // Highlight on hover too? Maybe overkill.
+        });
+
         this.overlay.querySelector('#refresh-btn')!.addEventListener('click', onRefresh);
         this.overlay.querySelector('#skip-shop-btn')!.addEventListener('click', onSkip);
     }
 
+    private highlightDie(dieId: string): void {
+        // Remove highlight from all
+        this.overlay.querySelectorAll('.sidebar-die').forEach(el => {
+            el.classList.remove('highlight');
+        });
+
+        // Add to target
+        const target = this.overlay.querySelector(`.sidebar-die[data-die-id="${dieId}"]`);
+        if (target) {
+            target.classList.add('highlight');
+        }
+    }
+
     private getDieName(die: Die): string {
-        // Try to extract a readable name from the die id
         const id = die.id;
         if (id.startsWith('even-')) return 'Even Die';
         if (id.startsWith('extreme-')) return 'Extreme Die';
-        if (id.startsWith('triple-')) return 'Triple Die';
+        if (id.startsWith('triple-')) return 'Triple Die'; // Keeping legacy ID check just in case
+        if (id.startsWith('quad-')) return 'Quad Die';
         if (id.startsWith('lucky7-')) return 'Lucky 7';
         if (id.startsWith('risky-')) return 'Risky Die';
         if (id.startsWith('double-')) return 'Double Roll';
         if (id.startsWith('copy-')) return 'Copy Die';
         if (id.startsWith('chain-')) return 'Chain Die';
-        if (id.startsWith('die-')) return 'd6';
         return 'd6';
     }
 
@@ -125,7 +151,6 @@ export class ShopRenderer {
         onSelect: (faceIndex: number) => void,
         onCancel: () => void
     ): void {
-        // We reuse the overlay but change content
         this.overlay.innerHTML = `
             <div class="overlay-content">
                 <h2>Select Face to Upgrade</h2>
