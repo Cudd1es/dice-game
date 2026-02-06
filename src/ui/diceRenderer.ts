@@ -7,9 +7,11 @@ export class DiceRenderer {
     private selectedDie: Die | null = null;
     private onArrange: (die: Die) => void = () => { };
     private onUnarrange: (die: Die) => void = () => { };
+    private onReorder: (die: Die, newIndex: number) => void = () => { };
     private currentDicePool: Die[] = [];
     private currentArranged: Die[] = [];
     private draggedDie: Die | null = null;
+    private dragSourceLocation: 'pool' | 'arranged' | null = null;
 
     constructor(trayId: string, zoneId: string) {
         this.tray = document.getElementById(trayId)!;
@@ -22,6 +24,10 @@ export class DiceRenderer {
 
     setOnUnarrange(callback: (die: Die) => void): void {
         this.onUnarrange = callback;
+    }
+
+    setOnReorder(callback: (die: Die, newIndex: number) => void): void {
+        this.onReorder = callback;
     }
 
     renderDiceTray(dice: Die[]): void {
@@ -49,13 +55,12 @@ export class DiceRenderer {
         this.zone.addEventListener('drop', (e) => {
             e.preventDefault();
             this.zone.classList.remove('drag-over');
-            if (this.draggedDie) {
-                // Check if die is from pool (not already arranged)
-                if (this.currentDicePool.includes(this.draggedDie)) {
-                    this.onArrange(this.draggedDie);
-                }
-                this.draggedDie = null;
+            this.clearDropIndicators();
+            if (this.draggedDie && this.dragSourceLocation === 'pool') {
+                this.onArrange(this.draggedDie);
             }
+            this.draggedDie = null;
+            this.dragSourceLocation = null;
         });
 
         // Click to place selected die
@@ -120,14 +125,57 @@ export class DiceRenderer {
         // Drag events
         el.addEventListener('dragstart', (e) => {
             this.draggedDie = die;
+            this.dragSourceLocation = location;
             el.classList.add('dragging');
             e.dataTransfer?.setData('text/plain', die.id);
         });
 
         el.addEventListener('dragend', () => {
             el.classList.remove('dragging');
+            this.clearDropIndicators();
             this.draggedDie = null;
+            this.dragSourceLocation = null;
         });
+
+        // Reorder drag events for arranged dice
+        if (location === 'arranged') {
+            el.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (this.draggedDie && this.dragSourceLocation === 'arranged' && this.draggedDie !== die) {
+                    this.clearDropIndicators();
+                    const rect = el.getBoundingClientRect();
+                    const midX = rect.left + rect.width / 2;
+                    if (e.clientX < midX) {
+                        el.classList.add('drop-left');
+                    } else {
+                        el.classList.add('drop-right');
+                    }
+                }
+            });
+
+            el.addEventListener('dragleave', () => {
+                el.classList.remove('drop-left', 'drop-right');
+            });
+
+            el.addEventListener('drop', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (this.draggedDie && this.dragSourceLocation === 'arranged' && this.draggedDie !== die) {
+                    const rect = el.getBoundingClientRect();
+                    const midX = rect.left + rect.width / 2;
+                    const targetIndex = this.currentArranged.indexOf(die);
+                    const draggedIndex = this.currentArranged.indexOf(this.draggedDie);
+                    let newIndex = e.clientX < midX ? targetIndex : targetIndex + 1;
+                    // Adjust for removal of dragged item
+                    if (draggedIndex < newIndex) newIndex--;
+                    this.onReorder(this.draggedDie, newIndex);
+                }
+                this.clearDropIndicators();
+                this.draggedDie = null;
+                this.dragSourceLocation = null;
+            });
+        }
 
         // Click events
         if (location === 'pool') {
@@ -167,5 +215,11 @@ export class DiceRenderer {
         // Select this one
         this.selectedDie = die;
         element.classList.add('selected');
+    }
+
+    private clearDropIndicators(): void {
+        this.zone.querySelectorAll('.die').forEach(el => {
+            el.classList.remove('drop-left', 'drop-right');
+        });
     }
 }

@@ -29,6 +29,7 @@ export class Game {
     init(): void {
         this.diceRenderer.setOnArrange((die) => this.handleDieArrange(die));
         this.diceRenderer.setOnUnarrange((die) => this.handleDieUnarrange(die));
+        this.diceRenderer.setOnReorder((die, newIndex) => this.handleDieReorder(die, newIndex));
         this.diceRenderer.setupArrangementZone();
 
         document.getElementById('roll-btn')!.addEventListener('click', () => this.rollDice());
@@ -70,6 +71,12 @@ export class Game {
         }
     }
 
+    private handleDieReorder(die: Die, newIndex: number): void {
+        if (this.state.reorderArrangedDie(die, newIndex)) {
+            this.diceRenderer.renderArrangementZone(this.state.arrangedDice);
+        }
+    }
+
     private async confirmArrangement(): Promise<void> {
         this.state.phase = 'resolving';
         document.getElementById('confirm-btn')!.setAttribute('disabled', 'true');
@@ -103,12 +110,17 @@ export class Game {
 
     private showShop(): void {
         this.currentShopItems = this.shop.generateItems(this.state.level);
+        this.renderShop();
+    }
 
+    private renderShop(): void {
         this.shopRenderer.render(
             this.currentShopItems,
             this.state.gold,
             this.state.dice,
-            (index, targetDieId) => this.handleBuy(index, targetDieId),
+            this.state.getRefreshCost(),
+            (index: number, targetDieId: string | null) => this.handleBuy(index, targetDieId),
+            () => this.handleRefresh(),
             () => this.closeShop()
         );
     }
@@ -132,14 +144,19 @@ export class Game {
         this.currentShopItems.splice(index, 1);
 
         // Re-render shop
-        this.shopRenderer.render(
-            this.currentShopItems,
-            this.state.gold,
-            this.state.dice,
-            (i, tid) => this.handleBuy(i, tid),
-            () => this.closeShop()
-        );
+        this.renderShop();
+        this.updateUI();
+    }
 
+    private handleRefresh(): void {
+        const cost = this.state.getRefreshCost();
+        if (this.state.gold < cost) return;
+
+        this.state.gold -= cost;
+        this.state.incrementRefreshCount();
+        this.currentShopItems = this.shop.generateItems(this.state.level);
+
+        this.renderShop();
         this.updateUI();
     }
 

@@ -13,19 +13,49 @@ export class ShopRenderer {
         items: ShopItem[],
         gold: number,
         existingDice: Die[],
+        refreshCost: number,
         onBuy: (index: number, targetDieId: string | null) => void,
+        onRefresh: () => void,
         onSkip: () => void
     ): void {
         this.overlay.classList.remove('hidden');
         this.overlay.innerHTML = `
             <div class="overlay-content shop-content">
                 <h2>Shop</h2>
-                <p class="shop-gold">Gold: <span class="gold">${gold}</span></p>
-                <div class="shop-items"></div>
+                <div class="shop-header">
+                    <p class="shop-gold">Gold: <span class="gold">${gold}</span></p>
+                    <button id="refresh-btn" class="refresh-btn" ${gold < refreshCost ? 'disabled' : ''}>
+                        Refresh (${refreshCost}g)
+                    </button>
+                </div>
+                <div class="shop-layout">
+                    <div class="shop-items"></div>
+                    <div class="dice-sidebar">
+                        <h3>Your Dice</h3>
+                        <div class="dice-list"></div>
+                    </div>
+                </div>
                 <button id="skip-shop-btn">Continue</button>
             </div>
         `;
 
+        // Render dice sidebar
+        const diceList = this.overlay.querySelector('.dice-list')!;
+        existingDice.forEach((die, index) => {
+            const dieEl = document.createElement('div');
+            dieEl.className = 'sidebar-die';
+            const modText = die.modifiers.length > 0
+                ? die.modifiers.map(m => m.name).join(', ')
+                : 'No modifiers';
+            dieEl.innerHTML = `
+                <span class="die-number">#${index + 1}</span>
+                <span class="die-id">${this.getDieName(die)}</span>
+                <span class="die-mods">${modText}</span>
+            `;
+            diceList.appendChild(dieEl);
+        });
+
+        // Render shop items
         const itemsContainer = this.overlay.querySelector('.shop-items')!;
 
         items.forEach((item, index) => {
@@ -39,7 +69,7 @@ export class ShopRenderer {
                     <div class="item-price">${item.price} gold</div>
                     <label>Apply to: 
                         <select class="target-select">
-                            ${existingDice.map(d => `<option value="${d.id}">${d.id} (${d.getCurrentValue()})</option>`).join('')}
+                            ${existingDice.map((d, i) => `<option value="${d.id}">#${i + 1} ${this.getDieName(d)}</option>`).join('')}
                         </select>
                     </label>
                     <button class="buy-btn" ${gold < item.price ? 'disabled' : ''}>Buy</button>
@@ -62,7 +92,23 @@ export class ShopRenderer {
             itemsContainer.appendChild(itemEl);
         });
 
+        this.overlay.querySelector('#refresh-btn')!.addEventListener('click', onRefresh);
         this.overlay.querySelector('#skip-shop-btn')!.addEventListener('click', onSkip);
+    }
+
+    private getDieName(die: Die): string {
+        // Try to extract a readable name from the die id
+        const id = die.id;
+        if (id.startsWith('even-')) return 'Even Die';
+        if (id.startsWith('extreme-')) return 'Extreme Die';
+        if (id.startsWith('triple-')) return 'Triple Die';
+        if (id.startsWith('lucky7-')) return 'Lucky 7';
+        if (id.startsWith('risky-')) return 'Risky Die';
+        if (id.startsWith('double-')) return 'Double Roll';
+        if (id.startsWith('copy-')) return 'Copy Die';
+        if (id.startsWith('chain-')) return 'Chain Die';
+        if (id.startsWith('die-')) return 'd6';
+        return 'd6';
     }
 
     hide(): void {

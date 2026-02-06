@@ -9,6 +9,7 @@ export class GameState {
     arrangedDice: Die[] = [];
     phase: GamePhase = 'rolling';
     currentScore: number = 0;
+    shopRefreshCount: number = 0;
 
     constructor() {
         this.reset();
@@ -21,6 +22,7 @@ export class GameState {
         this.arrangedDice = [];
         this.phase = 'rolling';
         this.currentScore = 0;
+        this.shopRefreshCount = 0;
     }
 
     private createStarterDice(): Die[] {
@@ -55,6 +57,18 @@ export class GameState {
         return true;
     }
 
+    reorderArrangedDie(die: Die, newIndex: number): boolean {
+        const currentIndex = this.arrangedDice.indexOf(die);
+        if (currentIndex === -1) return false;
+        if (newIndex < 0 || newIndex >= this.arrangedDice.length) return false;
+        if (currentIndex === newIndex) return false;
+
+        // Remove from current position and insert at new position
+        this.arrangedDice.splice(currentIndex, 1);
+        this.arrangedDice.splice(newIndex, 0, die);
+        return true;
+    }
+
     isArrangementComplete(): boolean {
         return this.arrangedDice.length === this.dice.length;
     }
@@ -66,6 +80,16 @@ export class GameState {
     advanceLevel(): void {
         this.level++;
         this.phase = 'shop';
+        this.shopRefreshCount = 0;
+    }
+
+    getRefreshCost(): number {
+        // Formula: 3 * 1.5^n, gives 3, 4, 6, 10, 15...
+        return Math.floor(3 * Math.pow(1.5, this.shopRefreshCount));
+    }
+
+    incrementRefreshCount(): void {
+        this.shopRefreshCount++;
     }
 
     endShop(): void {
