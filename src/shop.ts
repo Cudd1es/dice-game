@@ -1,6 +1,6 @@
 // src/shop.ts
 import type { Die, Modifier } from './types';
-import { DieImpl } from './dice';
+import { DieImpl, DoubleRollDie, CopyDie, ChainDie } from './dice';
 import {
     AddModifier,
     MultiplyModifier,
@@ -103,17 +103,32 @@ export class Shop {
     }
 
     private randomSpecialDie(level: number): ShopItem {
-        const dieTypes = [
-            { faces: [2, 2, 4, 4, 6, 6], name: 'Even Die', desc: 'Faces: 2,2,4,4,6,6', price: 12 },
-            { faces: [1, 1, 1, 6, 6, 6], name: 'Extreme Die', desc: 'Faces: 1,1,1,6,6,6', price: 10 },
-            { faces: [3, 3, 3, 3, 3, 3], name: 'Triple Die', desc: 'All faces are 3', price: 8 }
+        interface DieType {
+            create: () => Die;
+            name: string;
+            desc: string;
+            price: number;
+        }
+
+        const dieTypes: DieType[] = [
+            // Original dice
+            { create: () => new DieImpl(`even-${Date.now()}`, [2, 2, 4, 4, 6, 6]), name: 'Even Die', desc: 'Faces: 2,2,4,4,6,6', price: 12 },
+            { create: () => new DieImpl(`extreme-${Date.now()}`, [1, 1, 1, 6, 6, 6]), name: 'Extreme Die', desc: 'Faces: 1,1,1,6,6,6', price: 10 },
+            { create: () => new DieImpl(`triple-${Date.now()}`, [3, 3, 3, 3, 3, 3]), name: 'Triple Die', desc: 'All faces are 3', price: 8 },
+            // New value dice
+            { create: () => new DieImpl(`lucky7-${Date.now()}`, [1, 2, 3, 4, 5, 7]), name: 'Lucky 7 Die', desc: 'Faces: 1,2,3,4,5,7 (has 7!)', price: 15 },
+            { create: () => new DieImpl(`risky-${Date.now()}`, [-2, 0, 4, 6, 8, 10]), name: 'Risky Die', desc: 'Faces: -2,0,4,6,8,10 (high variance)', price: 12 },
+            // New special ability dice
+            { create: () => new DoubleRollDie(`double-${Date.now()}`), name: 'Double Roll Die', desc: 'Rolls twice, takes higher', price: 20 },
+            { create: () => new CopyDie(`copy-${Date.now()}`), name: 'Copy Die', desc: 'Copies previous die value', price: 18 },
+            { create: () => new ChainDie(`chain-${Date.now()}`), name: 'Chain Die', desc: 'Standard die + Next+2 built-in', price: 16 }
         ];
 
         const choice = dieTypes[Math.floor(Math.random() * dieTypes.length)];
 
         return {
             type: 'die',
-            die: new DieImpl(`special-${Date.now()}`, choice.faces),
+            die: choice.create(),
             name: choice.name,
             description: choice.desc,
             price: choice.price + level * 2

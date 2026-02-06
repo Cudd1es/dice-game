@@ -1,5 +1,6 @@
 // src/resolver.ts
 import type { Die, ChainState, ResolutionStep, AppliedEffect } from './types';
+import { CopyDie } from './dice';
 
 export interface ResolutionResult {
     totalScore: number;
@@ -18,9 +19,16 @@ export class ChainResolver {
 
         let totalScore = 0;
         const steps: ResolutionStep[] = [];
+        let previousFinalValue = 1; // Default for first position Copy Die
 
         for (let i = 0; i < arrangedDice.length; i++) {
             const die = arrangedDice[i];
+
+            // Handle Copy Die - set copied value before getting current value
+            if (die instanceof CopyDie) {
+                die.setCopiedValue(previousFinalValue);
+            }
+
             const originalValue = die.getCurrentValue();
             let value = originalValue;
             const appliedEffects: AppliedEffect[] = [];
@@ -117,6 +125,7 @@ export class ChainResolver {
                 finalValue: value
             });
 
+            previousFinalValue = value; // Store for Copy Die
             totalScore += value;
         }
 

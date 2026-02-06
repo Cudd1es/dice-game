@@ -5,6 +5,7 @@ import { DiceRenderer } from './ui/diceRenderer';
 import { ResolutionRenderer } from './ui/resolutionRenderer';
 import { ShopRenderer } from './ui/shopRenderer';
 import { Shop, ShopItem } from './shop';
+import { DieImpl, DoubleRollDie, CopyDie, ChainDie } from './dice';
 import type { Die } from './types';
 
 export class Game {
@@ -179,5 +180,43 @@ export class Game {
         document.getElementById('gold-display')!.textContent = `Gold: ${this.state.gold}`;
         document.getElementById('target-display')!.textContent = `Target: ${this.state.getTargetScore()}`;
         document.getElementById('score-display')!.textContent = `Score: ${this.state.currentScore}`;
+    }
+
+    // Debug/Test methods
+    public addGold(amount: number): void {
+        this.state.gold += amount;
+        this.updateUI();
+        console.log(`Added ${amount} gold. Current gold: ${this.state.gold}`);
+    }
+
+    public addSpecialDice(type: string): void {
+        let newDie: Die;
+        const id = `debug-${Date.now()}`;
+
+        switch (type.toLowerCase()) {
+            case 'lucky7':
+                newDie = new DieImpl(id, [1, 2, 3, 4, 5, 7]);
+                break;
+            case 'risky':
+                newDie = new DieImpl(id, [-2, 0, 4, 6, 8, 10]);
+                break;
+            case 'double':
+            case 'doubleroll':
+                newDie = new DoubleRollDie(id);
+                break;
+            case 'copy':
+                newDie = new CopyDie(id);
+                break;
+            case 'chain':
+                newDie = new ChainDie(id);
+                break;
+            default:
+                console.error(`Unknown dice type: ${type}. Valid types: lucky7, risky, double, copy, chain`);
+                return;
+        }
+
+        this.state.dice.push(newDie);
+        this.diceRenderer.renderDiceTray(this.state.getUnarrangedDice()); // Re-render pool
+        console.log(`Added ${type} die!`);
     }
 }
