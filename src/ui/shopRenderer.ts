@@ -119,4 +119,36 @@ export class ShopRenderer {
         const goldEl = this.overlay.querySelector('.gold');
         if (goldEl) goldEl.textContent = `${gold}`;
     }
+
+    renderFaceSelection(
+        die: Die,
+        onSelect: (faceIndex: number) => void,
+        onCancel: () => void
+    ): void {
+        // We reuse the overlay but change content
+        this.overlay.innerHTML = `
+            <div class="overlay-content">
+                <h2>Select Face to Upgrade</h2>
+                <p>Choose which face of the ${this.getDieName(die)} to upgrade (+1)</p>
+                <div class="face-selection-grid">
+                    ${die.faces.map((face, index) => `
+                        <div class="face-option" data-index="${index}">
+                            <span class="face-index">Face ${index + 1}</span>
+                            <div class="face-value">${face.getValue()}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <button id="cancel-selection-btn" class="cancel-btn">Cancel</button>
+            </div>
+        `;
+
+        this.overlay.querySelectorAll('.face-option').forEach(el => {
+            el.addEventListener('click', () => {
+                const index = parseInt((el as HTMLElement).dataset.index || '0');
+                onSelect(index);
+            });
+        });
+
+        document.getElementById('cancel-selection-btn')!.addEventListener('click', onCancel);
+    }
 }

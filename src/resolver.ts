@@ -78,9 +78,6 @@ export class ChainResolver {
                     valueAfter: value
                 });
             }
-            // Increase stack for next die
-            chainState.stackBonus += chainState.stackIncrement;
-
             // Apply die-level modifiers
             for (const mod of die.modifiers) {
                 const before = value;
@@ -117,6 +114,9 @@ export class ChainResolver {
                     });
                 }
             }
+
+            // Increase stack for next die (AFTER modifiers have potentially increased stackIncrement)
+            chainState.stackBonus += chainState.stackIncrement;
 
             steps.push({
                 dieId: die.id,

@@ -44,7 +44,7 @@ export interface DieFace {
 }
 
 export interface Modifier {
-    type: 'add' | 'multiply' | 'next' | 'global' | 'stack' | 'conditional';
+    type: 'add' | 'multiply' | 'next' | 'global' | 'stack' | 'conditional' | 'faceUpgrade';
     name: string;
     description: string;
     apply(context: ModifierContext): number;

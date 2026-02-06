@@ -90,7 +90,7 @@ export class StackAddModifier implements Modifier {
     }
 }
 
-// Conditional Modifier: If current die is even, next die x2
+// Conditional Modifier: If NEXT die is even, next die x2
 export class IfEvenNextMultiply implements Modifier {
     type: 'conditional' = 'conditional';
     name: string;
@@ -99,19 +99,23 @@ export class IfEvenNextMultiply implements Modifier {
 
     constructor(factor: number = 2) {
         this.factor = factor;
-        this.name = `Even→x${factor}`;
-        this.description = `If this die is EVEN, next die x${factor}`;
+        this.name = `Next Even→x${factor}`;
+        this.description = `If NEXT die is EVEN, it gets x${factor}`;
     }
 
     apply(context: ModifierContext): number {
-        if (context.currentValue % 2 === 0) {
-            context.chainState.nextMultiplier *= this.factor;
+        const nextDie = context.allDice[context.dieIndex + 1];
+        if (nextDie) {
+            const nextValue = nextDie.getCurrentValue();
+            if (nextValue % 2 === 0) {
+                context.chainState.nextMultiplier *= this.factor;
+            }
         }
         return context.currentValue;
     }
 }
 
-// Conditional Modifier: If current die >= 4, next die +3
+// Conditional Modifier: If NEXT die >= 4, next die +3
 export class IfHighNextAdd implements Modifier {
     type: 'conditional' = 'conditional';
     name: string;
@@ -122,19 +126,23 @@ export class IfHighNextAdd implements Modifier {
     constructor(threshold: number = 4, bonus: number = 3) {
         this.threshold = threshold;
         this.bonus = bonus;
-        this.name = `≥${threshold}→+${bonus}`;
-        this.description = `If this die is ${threshold}+, next die +${bonus}`;
+        this.name = `Next≥${threshold}→+${bonus}`;
+        this.description = `If NEXT die is ${threshold}+, it gets +${bonus}`;
     }
 
     apply(context: ModifierContext): number {
-        if (context.currentValue >= this.threshold) {
-            context.chainState.nextBonus += this.bonus;
+        const nextDie = context.allDice[context.dieIndex + 1];
+        if (nextDie) {
+            const nextValue = nextDie.getCurrentValue();
+            if (nextValue >= this.threshold) {
+                context.chainState.nextBonus += this.bonus;
+            }
         }
         return context.currentValue;
     }
 }
 
-// Conditional Modifier: If current die is max (6), next die x3
+// Conditional Modifier: If NEXT die is max (6), next die x3
 export class IfMaxNextMultiply implements Modifier {
     type: 'conditional' = 'conditional';
     name: string;
@@ -143,15 +151,39 @@ export class IfMaxNextMultiply implements Modifier {
 
     constructor(factor: number = 3) {
         this.factor = factor;
-        this.name = `Max→x${factor}`;
-        this.description = `If this die is 6, next die x${factor}`;
+        this.name = `Next Max→x${factor}`;
+        this.description = `If NEXT die is 6, it gets x${factor}`;
     }
 
     apply(context: ModifierContext): number {
-        // Check if current value equals the max possible (assuming standard die)
-        if (context.currentValue === 6) {
-            context.chainState.nextMultiplier *= this.factor;
+        const nextDie = context.allDice[context.dieIndex + 1];
+        if (nextDie) {
+            const nextValue = nextDie.getCurrentValue();
+            // Check if next value equals the max possible (assuming standard die)
+            if (nextValue === 6) {
+                context.chainState.nextMultiplier *= this.factor;
+            }
         }
+        return context.currentValue;
+    }
+}
+
+// Face Upgrade Modifier: Permanently increases a specific face of a die by 1
+// This modifier triggers a face selection UI when bought
+export class FaceUpgradeModifier implements Modifier {
+    type: 'faceUpgrade' = 'faceUpgrade';
+    name: string;
+    description: string;
+    upgradeAmount: number;
+
+    constructor(upgradeAmount: number = 1) {
+        this.upgradeAmount = upgradeAmount;
+        this.name = `Face Upgrade +${upgradeAmount}`;
+        this.description = `Permanently upgrade a chosen face by +${upgradeAmount}`;
+    }
+
+    // This apply method doesn't change current value
+    apply(context: ModifierContext): number {
         return context.currentValue;
     }
 }

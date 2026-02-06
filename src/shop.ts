@@ -9,7 +9,8 @@ import {
     StackAddModifier,
     IfEvenNextMultiply,
     IfHighNextAdd,
-    IfMaxNextMultiply
+    IfMaxNextMultiply,
+    FaceUpgradeModifier
 } from './modifiers';
 
 export interface ShopItem {
@@ -87,6 +88,13 @@ export class Shop {
                 price: 14 + level * 2,
                 name: (m: Modifier) => m.name,
                 desc: (m: Modifier) => m.description
+            },
+            // Face upgrade modifier - randomly selects a face value to upgrade
+            {
+                create: () => new FaceUpgradeModifier(1),
+                price: 6 + level,
+                name: (m: Modifier) => m.name,
+                desc: (m: Modifier) => m.description
             }
         ];
 
@@ -113,12 +121,9 @@ export class Shop {
         const dieTypes: DieType[] = [
             // Original dice
             { create: () => new DieImpl(`even-${Date.now()}`, [2, 2, 4, 4, 6, 6]), name: 'Even Die', desc: 'Faces: 2,2,4,4,6,6', price: 12 },
-            { create: () => new DieImpl(`extreme-${Date.now()}`, [1, 1, 1, 6, 6, 6]), name: 'Extreme Die', desc: 'Faces: 1,1,1,6,6,6', price: 10 },
-            { create: () => new DieImpl(`triple-${Date.now()}`, [3, 3, 3, 3, 3, 3]), name: 'Triple Die', desc: 'All faces are 3', price: 8 },
-            // New value dice
-            { create: () => new DieImpl(`lucky7-${Date.now()}`, [1, 2, 3, 4, 5, 7]), name: 'Lucky 7 Die', desc: 'Faces: 1,2,3,4,5,7 (has 7!)', price: 15 },
-            { create: () => new DieImpl(`risky-${Date.now()}`, [-2, 0, 4, 6, 8, 10]), name: 'Risky Die', desc: 'Faces: -2,0,4,6,8,10 (high variance)', price: 12 },
-            // New special ability dice
+            { create: () => new DieImpl(`extreme-${Date.now()}`, [1, 1, 6, 6, 6, 6]), name: 'Extreme Die', desc: 'Faces: 1,1,6,6,6,6 (high risk, high reward)', price: 14 },
+            { create: () => new DieImpl(`quad-${Date.now()}`, [4, 4, 4, 4, 4, 4]), name: 'Quad Die', desc: 'All faces are 4 (consistent)', price: 10 },
+            // Special ability dice
             { create: () => new DoubleRollDie(`double-${Date.now()}`), name: 'Double Roll Die', desc: 'Rolls twice, takes higher', price: 20 },
             { create: () => new CopyDie(`copy-${Date.now()}`), name: 'Copy Die', desc: 'Copies previous die value', price: 18 },
             { create: () => new ChainDie(`chain-${Date.now()}`), name: 'Chain Die', desc: 'Standard die + Next+2 built-in', price: 16 }

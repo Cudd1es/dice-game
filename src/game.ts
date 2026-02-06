@@ -7,6 +7,9 @@ import { ShopRenderer } from './ui/shopRenderer';
 import { Shop, ShopItem } from './shop';
 import { DieImpl, DoubleRollDie, CopyDie, ChainDie } from './dice';
 import type { Die } from './types';
+import {
+    FaceUpgradeModifier
+} from './modifiers';
 
 export class Game {
     private state: GameState;
@@ -128,6 +131,31 @@ export class Game {
     private handleBuy(index: number, targetDieId: string | null): void {
         const item = this.currentShopItems[index];
         if (!item || this.state.gold < item.price) return;
+
+        // Special handling for Face Upgrade Modifier
+        if (item.type === 'modifier' && item.item instanceof FaceUpgradeModifier && targetDieId) {
+            const targetDie = this.state.dice.find(d => d.id === targetDieId);
+            if (targetDie) {
+                this.shopRenderer.renderFaceSelection(
+                    targetDie,
+                    (faceIndex: number) => {
+                        // Apply upgrade
+                        targetDie.faces[faceIndex].baseValue += (item.item as FaceUpgradeModifier).upgradeAmount;
+
+                        // Complete purchase
+                        this.state.gold -= item.price;
+                        this.currentShopItems.splice(index, 1);
+                        this.renderShop();
+                        this.updateUI();
+                    },
+                    () => {
+                        // Cancelled - just re-render shop
+                        this.renderShop();
+                    }
+                );
+                return; // Stop here, rest happens in callback
+            }
+        }
 
         this.state.gold -= item.price;
 
