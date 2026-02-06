@@ -89,7 +89,7 @@ export class Game {
 
     private handleWin(score: number, target: number): void {
         const bonus = Math.floor((score - target) / 5);
-        this.state.gold += 5 + bonus;
+        this.state.gold += 8 + bonus;
         this.state.advanceLevel();
         this.updateUI();
 

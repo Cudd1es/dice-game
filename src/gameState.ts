@@ -16,7 +16,7 @@ export class GameState {
 
     reset(): void {
         this.level = 1;
-        this.gold = 0;
+        this.gold = 10;
         this.dice = this.createStarterDice();
         this.arrangedDice = [];
         this.phase = 'rolling';
@@ -32,8 +32,8 @@ export class GameState {
     }
 
     getTargetScore(): number {
-        // Simple progression: 10 + (level-1) * 5
-        return 10 + (this.level - 1) * 5;
+        // Gentler progression: 8 + (level-1) * 3
+        return 8 + (this.level - 1) * 3;
     }
 
     rollAllDice(): void {

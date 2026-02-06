@@ -41,7 +41,7 @@ export class Shop {
         const types = [
             {
                 create: () => new AddModifier(Math.ceil(level / 2) + 1),
-                price: 5 + level,
+                price: 4 + level,
                 name: (m: Modifier) => m.name,
                 desc: (m: Modifier) => m.description
             },
